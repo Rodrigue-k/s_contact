@@ -23,14 +23,14 @@ Click the "Fork" button in the top right corner of the repository page.
 ### 2. Clone Your Fork
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/s_contact.git
+git clone https://github.com/Rodrigue-k/s_contact.git
 cd s_contact
 ```
 
 ### 3. Add Upstream Remote
 
 ```bash
-git remote add upstream https://github.com/ORIGINAL_OWNER/s_contact.git
+git remote add upstream https://github.com/Rodrigue-k/s_contact.git
 ```
 
 ### 4. Install Dependencies
