@@ -4,8 +4,8 @@
 [![Dart](https://img.shields.io/badge/Dart-3.0+-blue.svg)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2024-orange.svg)](https://hacktoberfest.com)
-[![Open Source Love](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red.svg)](https://github.com/YOUR_USERNAME/s_contact)
+[![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-2025-orange.svg)](https://hacktoberfest.com)
+[![Open Source Love](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red.svg)](https://github.com/Rodrigue-k/s_contact)
 
 <div align="center">
   <p><strong>Share your contact information instantly with beautiful QR codes! 📱✨</strong></p>
@@ -234,6 +234,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for the Flutter community**
 
-[⭐ Star this repo](https://github.com/YOUR_USERNAME/s_contact) | [🐛 Report Bug](https://github.com/YOUR_USERNAME/s_contact/issues) | [💡 Request Feature](https://github.com/YOUR_USERNAME/s_contact/issues)
+[⭐ Star this repo](https://github.com/Rodrigue-k/s_contact) | [🐛 Report Bug](https://github.com/Rodrigue-k/s_contact/issues) | [💡 Request Feature](https://github.com/Rodrigue-k/s_contact/issues)
 
 </div>
