@@ -15,45 +15,117 @@
 
 ## 🚀 About S-Contact
 
-S-Contact is a modern Flutter application that allows users to create digital business cards and share their contact information through QR codes. Perfect for networking events, business meetings, or just making it easier for people to save your contact details!
+S-Contact est une application Flutter open-source pour partager et enregistrer rapidement des contacts via QR code. Elle permet de créer une **carte de visite numérique** sous forme de QR code que d'autres peuvent scanner avec n'importe quelle application de lecture de QR code, sans serveur externe ni API compliquée.
 
-### ✨ Key Features
+L'application est **cross-platform (Android + iOS)**, compatible avec desktop à terme, et met l'accent sur la simplicité, la sécurité et la confidentialité : les données restent locales, sans permissions sensibles (pas d'accès caméra nécessaire).
 
-- 🎨 **Beautiful UI**: Modern, clean design with dark/light theme support
-- 📱 **Cross-platform**: Works on Android, iOS, Web, Windows, macOS, and Linux
-- 🔄 **Real-time Updates**: Instant profile synchronization
-- 📊 **QR Code Generation**: High-quality, customizable QR codes
-- 🌍 **Internationalization Ready**: Prepared for multiple languages
-- 💾 **Local Storage**: All data stored securely on device
-- ⚡ **Fast & Responsive**: Optimized for smooth user experience
+**Nom du projet :** s_contact  
+**Description :** Une application Flutter open-source pour partager et enregistrer rapidement des contacts via QR code.
 
 ---
 
-## 🛠️ Tech Stack
+## 💡 Pourquoi c’est une idée géniale
 
-- **Framework**: Flutter 3.9+
-- **Language**: Dart 3.0+
-- **State Management**: Riverpod
-- **Architecture**: Clean Architecture with separation of concerns
-- **Storage**: Shared Preferences
-- **QR Generation**: qr_flutter
-- **Icons**: Material Icons & Cupertino Icons
-- **Testing**: Flutter Test
+* ✅ **Aucune dépendance API** (pas besoin de clé Google ou Apple).
+* ✅ **Compatible partout** (Android, iOS, voire plus tard desktop).
+* ✅ **Sécurité et confidentialité maximales** : les données restent locales.
+* ✅ **Simplicité UX** : créer son profil → générer QR code → partager.
+* ✅ **Zéro permission sensible** (pas d'accès caméra nécessaire).
 
 ---
 
-## 🎯 Project Structure
+## ✨ Key Features
+
+- 🎨 **Beautiful UI**: Modern, clean design with dark/light theme support.
+- 📱 **Cross-platform**: Works on Android, iOS, Web, Windows, macOS, and Linux.
+- 🔄 **Real-time Updates**: Instant profile synchronization.
+- 📊 **QR Code Generation**: High-quality, customizable QR codes in vCard format.
+- 🌍 **Internationalization Ready**: Prepared for multiple languages.
+- 💾 **Local Storage**: All data stored securely on device.
+- ⚡ **Fast & Responsive**: Optimized for smooth user experience.
+- Créez votre carte de contact numérique.
+- Générez votre QR code personnel en format vCard.
+- Partagez votre QR code avec d'autres.
+- Compatible Android & iOS.
+
+---
+
+## ⚙️ Fonctionnement général
+
+### 1️⃣ Création du profil utilisateur
+
+Au premier lancement :
+
+* L’utilisateur remplit son profil : Nom, Téléphone, Email, Société (facultatif), Site web (facultatif).
+* Ces données sont enregistrées **localement** (dans `SharedPreferences` ou `Hive`).
+
+### 2️⃣ Génération du QR code
+
+* L'app encode les données sous forme de **vCard (.vcf)** (format standard pour les contacts).
+* Le QR code contient le texte complet du contact en format vCard, par exemple :
+
+```
+BEGIN:VCARD
+VERSION:3.0
+N:KOUDAKPO;Rodrigue;;;
+TEL;TYPE=mobile:+22890123456
+EMAIL:rodrigue@example.com
+END:VCARD
+```
+
+* Ce QR code est affiché à l'écran (comme une "carte de visite numérique").
+
+### 3️⃣ Partage du QR code
+
+* D'autres personnes peuvent scanner le QR code avec n'importe quelle application de lecture de QR code.
+* Le QR code génère automatiquement une vCard compatible avec tous les carnets d'adresses.
+
+---
+
+## 🧱 Stack technique
+
+| Élément                          | Technologie / Package Flutter                        |
+| :------------------------------- | :--------------------------------------------------- |
+| Génération QR code               | `qr_flutter`                                         |
+| Stockage local                   | `shared_preferences`                                 |
+| Gestion d'état                   | `flutter_riverpod`                                   |
+| Thèmes et design                 | `google_fonts` + Material Design                     |
+| Format vCard                     | Implémentation maison                                |
+
+**Tech Stack global :** Flutter, Dart, qr_flutter, flutter_riverpod, shared_preferences.
+
+---
+
+## 🧩 Architecture simple (MVP)
 
 ```
 lib/
 ├── core/           # Core utilities and themes
-├── data/           # Data sources and repositories
-├── models/         # Data models
-├── pages/          # UI screens
-├── providers/      # State management
+├── data/           # Data sources and repositories (ex. local_storage.dart)
+├── models/         # Data models (ex. contact_model.dart)
+├── pages/          # UI screens (ex. home_page.dart, profile_page.dart, qr_view_page.dart)
+├── providers/      # State management (ex. profile_provider.dart)
 ├── widgets/        # Reusable UI components
 └── routes.dart     # Navigation configuration
 ```
+
+* **main.dart** → point d'entrée, configuration Riverpod.
+* **home_page.dart** → page principale avec formulaire ou QR code selon l'état.
+* **profile_page.dart** → pour configurer et modifier les infos personnelles.
+* **qr_view_page.dart** → affiche le QR code en plein écran.
+* **routes.dart** → gestion de la navigation.
+* **providers/** → gestion d'état avec Riverpod.
+
+This project follows Clean Architecture principles:
+- **Presentation Layer**: Pages and Widgets
+- **Domain Layer**: Business logic and models
+- **Data Layer**: Local storage and external services
+
+**Key Components**:
+- **Providers**: Riverpod for state management
+- **Models**: Immutable data structures
+- **Services**: Business logic operations
+- **Repositories**: Data access abstraction
 
 ---
 
@@ -69,7 +141,7 @@ lib/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/s_contact.git
+   git clone https://github.com/Rodrigue-k/s_contact.git
    cd s_contact
    ```
 
@@ -107,6 +179,25 @@ flutter build linux
 
 ---
 
+## 🚀 Évolution possible (v2+)
+
+* Synchronisation facultative via Firebase (option cloud).
+* Personnalisation du QR code (logo, couleur, style).
+* Partage rapide via NFC ou lien universel.
+* Intégration automatique à Google Contacts via OAuth (optionnel).
+* Import/export CSV ou VCF multiple.
+
+**Roadmap :**
+
+* [x] Page profil utilisateur avec Riverpod
+* [x] Génération QR code vCard
+* [x] Interface adaptative (formulaire/QR selon état)
+* [x] Design simple et responsive
+* [ ] Partage du QR code (WhatsApp, etc.)
+* [ ] Personnalisation du design du QR code
+
+---
+
 ## 🤝 Contributing
 
 We love contributions! This project is perfect for **Hacktoberfest** participants. Here's how you can help:
@@ -133,6 +224,8 @@ We love contributions! This project is perfect for **Hacktoberfest** participant
 ## 🎯 Hacktoberfest Issues
 
 Looking for ways to contribute? Check out these **Hacktoberfest-friendly** issues:
+
+Voir les [issues labellisées](https://github.com/Rodrigue-k/s_contact/issues?q=is%3Aissue+is%3Aopen+label%3Ahacktoberfest)
 
 ### 🐛 Bug Fixes
 - [ ] Fix responsive design issues on tablets
@@ -164,34 +257,24 @@ Looking for ways to contribute? Check out these **Hacktoberfest-friendly** issue
 - [ ] Add API documentation
 - [ ] Create developer setup guide
 
----
-
-## 🏗️ Architecture
-
-This project follows Clean Architecture principles:
-
-- **Presentation Layer**: Pages and Widgets
-- **Domain Layer**: Business logic and models
-- **Data Layer**: Local storage and external services
-
-### Key Components
-
-- **Providers**: Riverpod for state management
-- **Models**: Immutable data structures
-- **Services**: Business logic operations
-- **Repositories**: Data access abstraction
+**Règles pour Hacktoberfest 2025** : PRs mergés ou labellisés "hacktoberfest-accepted" comptent. Gagnez des badges Holopin et un t-shirt pour 6 PRs mergés !
 
 ---
 
 ## 📱 Screenshots
 
-*Add screenshots of your app here*
+Voici quelques aperçus de S-Contact en action, en modes clair et sombre :
 
+| Page d'accueil (Clair) | Page d'accueil (Sombre) | QR Code (Clair) | QR Code (Sombre) |
+|-----------------------|-------------------------|-----------------|------------------|
+| ![Home Light](assets/home_light.png) | ![Home Dark](assets/home_dark.png) | ![QR Code Light](assets/QrCode_light.png) | ![QR Code Dark](assets/QrCode_dark.png) |
+
+*Ajoutez vos propres screenshots pour de nouvelles fonctionnalités en soumettant une PR ! Consultez les [issues Hacktoberfest](https://github.com/Rodrigue-k/s_contact/issues?q=is%3Aissue+is%3Aopen+label%3Ahacktoberfest) pour contribuer.*
 ---
 
 ## 🐛 Found a Bug?
 
-We appreciate bug reports! Please use the [issue tracker](https://github.com/YOUR_USERNAME/s_contact/issues) to report any bugs or request features.
+We appreciate bug reports! Please use the [issue tracker](https://github.com/Rodrigue-k/s_contact/issues) to report any bugs or request features.
 
 **Bug Report Template:**
 ```markdown
