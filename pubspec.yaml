@@ -1,9 +1,7 @@
 name: s_contact
 description: "A modern Flutter app for creating and sharing contact information through QR codes. Perfect for networking and digital business cards."
-homepage: https://github.com/YOUR_USERNAME/s_contact
-repository: https://github.com/YOUR_USERNAME/s_contact
-issue_tracker: https://github.com/YOUR_USERNAME/s_contact/issues
-version: 1.0.0+1
+
+publish_to: 'none'
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
