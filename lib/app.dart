@@ -16,15 +16,7 @@ class App extends StatelessWidget {
       initialRoute: AppRoutes.home,
       onGenerateRoute: AppRoutes.generateRoute,
 
-      // Configuration locale pour l'internationalisation
-      localizationsDelegates: const [
-        // DefaultMaterialLocalizations.delegate,
-        // DefaultWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('fr', 'FR'), // Français
-        Locale('en', 'US'), // Anglais
-      ],
+
 
       // Builder pour gérer les contextes de navigation
       builder: (context, child) {

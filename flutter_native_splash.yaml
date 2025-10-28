@@ -38,14 +38,14 @@ flutter_native_splash:
   # use the [required] background_image in the next section. the reverse is true.
   # select one, they cant work together.
   #color: "#42a5f5"  ##====================================[REQUIRED]==========
-  #color_dark: "#042a49"
+  color_dark: "#0F172A"  # Background color du dark theme de l'app
   # platform-specific color. will override general color if active:
   #color_android: "#42a5f5"
-  #color_dark_android: "#042a49"
+  color_dark_android: "#0F172A"  # Dark mode pour Android
   #color_ios: "#42a5f5"
-  #color_dark_ios: "#042a49"
+  color_dark_ios: "#0F172A"  # Dark mode pour iOS
   #color_web: "#42a5f5"
-  #color_dark_web: "#042a49"
+  color_dark_web: "#0F172A"  # Dark mode pour Web
 
   # general background_image for all platform (except android 12+)
   # if you specify this [required] background_image, then you should comment the 
@@ -134,7 +134,7 @@ flutter_native_splash:
   android_12:
     # background color
     #color: "#42a5f5"
-    # color_dark: "#042a49"
+    color_dark: "#0F172A"  # Background color du dark theme de l'app
 
     # center-logo
     # If this parameter is not specified, the app's launcher icon will be used instead. 
@@ -146,8 +146,8 @@ flutter_native_splash:
     # image_dark: assets/images/logo/logo-splash2.png  
 
     # center-logo background color
-    icon_background_color: "#111111"
-    # icon_background_color_dark: "#eeeeee"
+    # icon_background_color: "#F8FAFC"  # Couleur claire pour le light mode
+    # icon_background_color_dark: "#334155"  # Couleur sombre pour le dark mode (pas noir)
 
     # branding:
     # The branding image dimensions must be 800x320 px.
