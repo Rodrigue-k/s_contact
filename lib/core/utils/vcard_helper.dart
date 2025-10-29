@@ -108,7 +108,7 @@ class VCardHelper {
             }
             break;
           case 'TEL':
-            // Téléphone avec type (ex: TEL;TYPE=CELL:+33123456789)
+            // Téléphone avec type (ex: TEL;TYPE=CELL:+22899999999)
             if (property.contains('CELL') || property.contains('MOBILE')) {
               contact.phone = _extractValue(currentValue);
             } else if (contact.phone == null || contact.phone!.isEmpty) {
