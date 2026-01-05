@@ -48,3 +48,4 @@ app.*.map.json
 /android/key.properties
 
 .windsurf\workflows\scontact-rules.md
+/releases/
