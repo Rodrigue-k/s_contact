@@ -44,4 +44,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+/android/koudatek-key.jks
+/android/key.properties
+
 .windsurf\workflows\scontact-rules.md
