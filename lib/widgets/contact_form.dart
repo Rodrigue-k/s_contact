@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:s_contact/core/theme.dart';
 import 'package:s_contact/models/contact_model.dart';
 
+/// Modern, professional contact form with clean design
 class ContactForm extends StatefulWidget {
   final ContactModel? initialContact;
   final Future<bool> Function(ContactModel) onSave;
@@ -20,8 +21,8 @@ class ContactForm extends StatefulWidget {
 
 class _ContactFormState extends State<ContactForm> {
   final _formKey = GlobalKey<FormState>();
+  bool _isSaving = false;
 
-  late TextEditingController _nameController;
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _phoneController;
@@ -42,7 +43,6 @@ class _ContactFormState extends State<ContactForm> {
   }
 
   void _initializeControllers() {
-    _nameController = TextEditingController();
     _firstNameController = TextEditingController();
     _lastNameController = TextEditingController();
     _phoneController = TextEditingController();
@@ -55,7 +55,6 @@ class _ContactFormState extends State<ContactForm> {
   }
 
   void _populateControllers(ContactModel contact) {
-    _nameController.text = contact.name;
     _firstNameController.text = contact.firstName ?? '';
     _lastNameController.text = contact.lastName ?? '';
     _phoneController.text = contact.phone ?? '';
@@ -68,17 +67,20 @@ class _ContactFormState extends State<ContactForm> {
   }
 
   void _saveForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate() || _isSaving) return;
+
+    setState(() => _isSaving = true);
+
+    // Build full name from first + last
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final fullName = [firstName, lastName].where((s) => s.isNotEmpty).join(' ');
 
     final contact = ContactModel(
       id: widget.initialContact?.id,
-      name: _nameController.text.trim(),
-      firstName: _firstNameController.text.trim().isNotEmpty
-          ? _firstNameController.text.trim()
-          : null,
-      lastName: _lastNameController.text.trim().isNotEmpty
-          ? _lastNameController.text.trim()
-          : null,
+      name: fullName,
+      firstName: firstName.isNotEmpty ? firstName : null,
+      lastName: lastName.isNotEmpty ? lastName : null,
       phone: _phoneController.text.trim().isNotEmpty
           ? _phoneController.text.trim()
           : null,
@@ -107,10 +109,23 @@ class _ContactFormState extends State<ContactForm> {
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.initialContact != null
-                ? 'Profil mis à jour avec succès !'
-                : 'Profil créé avec succès !'),
-            backgroundColor: const Color(0xFF10B981), // Vert succès
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  widget.initialContact != null
+                      ? 'Profil mis à jour'
+                      : 'Profil créé',
+                ),
+              ],
+            ),
+            backgroundColor: AppTheme.primaryColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(16),
           ),
         );
       }
@@ -119,59 +134,55 @@ class _ContactFormState extends State<ContactForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: const Color(0xFFEF4444), // Rouge erreur
+            backgroundColor: AppTheme.errorColor,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Titre si fourni
           if (widget.title != null) ...[
             Text(
               widget.title!,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
           ],
 
-          // Nom complet
-          TextFormField(
-            controller: _nameController,
-            decoration: _buildInputDecoration(context, 'Nom complet', 'Ex: Kokou KODJO', Icons.person),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Le nom est obligatoire';
-              }
-              return null;
-            },
-          ),
-
-          const SizedBox(height: 16),
-
-          // Prénom et nom séparés
+          // Name Fields
           Row(
             children: [
               Expanded(
-                child: TextFormField(
+                child: _buildTextField(
                   controller: _firstNameController,
-                  decoration: _buildInputDecoration(context, 'Prénom', 'Kokou'),
+                  label: 'Prénom',
+                  icon: Icons.person_outline_rounded,
+                  isDark: isDark,
+                  isRequired: true,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: TextFormField(
+                child: _buildTextField(
                   controller: _lastNameController,
-                  decoration: _buildInputDecoration(context, 'Nom', 'KODJO'),
+                  label: 'Nom',
+                  icon: Icons.person_outline_rounded,
+                  isDark: isDark,
                 ),
               ),
             ],
@@ -179,146 +190,187 @@ class _ContactFormState extends State<ContactForm> {
 
           const SizedBox(height: 16),
 
-          // Téléphone
-          TextFormField(
+          _buildTextField(
             controller: _phoneController,
-            decoration: _buildInputDecoration(context, 'Téléphone', '+228 90 00 00 00', Icons.phone),
+            label: 'Téléphone',
+            icon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                final phoneRegex = RegExp(r'^[+]?[\d\s\-\(\)]+$');
-                if (!phoneRegex.hasMatch(value)) {
-                  return 'Format de téléphone invalide';
-                }
-              }
-              return null;
-            },
+            isDark: isDark,
           ),
 
           const SizedBox(height: 16),
 
-          // Email
-          TextFormField(
+          _buildTextField(
             controller: _emailController,
-            decoration: _buildInputDecoration(context, 'Email', 'kokou.kodjo@email.com', Icons.email),
+            label: 'Email',
+            icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                if (!emailRegex.hasMatch(value)) {
-                  return 'Format d\'email invalide';
-                }
-              }
-              return null;
-            },
+            isDark: isDark,
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
-          // Entreprise
-          TextFormField(
+          // Divider
+          Divider(color: isDark ? Colors.grey[700] : Colors.grey[300]),
+
+          const SizedBox(height: 24),
+
+          _buildTextField(
             controller: _companyController,
-            decoration: _buildInputDecoration(context, 'Entreprise', 'Togocom, Ecobank, etc.', Icons.business),
+            label: 'Entreprise',
+            icon: Icons.business_outlined,
+            isDark: isDark,
           ),
 
           const SizedBox(height: 16),
 
-          // Poste
-          TextFormField(
+          _buildTextField(
             controller: _jobTitleController,
-            decoration: _buildInputDecoration(context, 'Poste', 'Développeur, Manager, etc.', Icons.work),
+            label: 'Poste',
+            icon: Icons.work_outline_rounded,
+            isDark: isDark,
           ),
 
           const SizedBox(height: 16),
 
-          // Adresse
-          TextFormField(
+          _buildTextField(
             controller: _addressController,
-            decoration: _buildInputDecoration(context, 'Adresse', 'Agoè, Bè, Tokoin, Lomé', Icons.location_on),
+            label: 'Adresse',
+            icon: Icons.location_on_outlined,
+            isDark: isDark,
             maxLines: 2,
           ),
 
           const SizedBox(height: 16),
 
-          // Site web
-          TextFormField(
+          _buildTextField(
             controller: _websiteController,
-            decoration: _buildInputDecoration(context, 'Site web', 'https://example.com', Icons.language),
+            label: 'Site web',
+            icon: Icons.language_rounded,
             keyboardType: TextInputType.url,
+            isDark: isDark,
           ),
 
           const SizedBox(height: 16),
 
-          // Note
-          TextFormField(
+          _buildTextField(
             controller: _noteController,
-            decoration: _buildInputDecoration(context, 'Note', 'Informations personnelles...', Icons.note),
+            label: 'Notes',
+            icon: Icons.notes_rounded,
+            isDark: isDark,
             maxLines: 3,
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
-          // Bouton de sauvegarde
+          // Save Button
           SizedBox(
             width: double.infinity,
+            height: 52,
             child: ElevatedButton(
-              onPressed: _saveForm,
+              onPressed: _isSaving ? null : _saveForm,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: AppTheme.primaryColor,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                elevation: 2,
+                elevation: 0,
               ),
-              child: Text(
-                widget.initialContact != null ? 'Mettre à jour' : 'Créer le profil',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      widget.initialContact != null ? 'Enregistrer' : 'Créer',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
+
+          const SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(BuildContext context, String labelText, String hintText, [IconData? icon]) {
-    return InputDecoration(
-      labelText: labelText,
-      hintText: hintText,
-      prefixIcon: icon != null ? Icon(icon) : null,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: Theme.of(context).dividerColor,
-          width: 1,
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required bool isDark,
+    IconData? icon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    bool isRequired = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      style: TextStyle(
+        color: isDark ? Colors.white : AppTheme.textPrimary,
+        fontSize: 15,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: icon != null
+            ? Icon(
+                icon,
+                size: 20,
+                color: AppTheme.primaryColor.withValues(alpha: 0.7),
+              )
+            : null,
+        filled: true,
+        fillColor: isDark ? const Color(0xFF1E293B) : Colors.grey[50],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF334155) : Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.primaryColor, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppTheme.errorColor, width: 1),
+        ),
+        labelStyle: TextStyle(
+          color: isDark ? Colors.grey[400] : Colors.grey[600],
+          fontSize: 14,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
         ),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: Theme.of(context).dividerColor,
-          width: 1,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: AppTheme.primaryColor,
-          width: 2,
-        ),
-      ),
-      filled: true,
-      fillColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      validator: isRequired
+          ? (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Ce champ est requis';
+              }
+              return null;
+            }
+          : null,
     );
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();

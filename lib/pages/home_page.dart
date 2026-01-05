@@ -5,7 +5,6 @@ import 'package:s_contact/core/theme.dart';
 import 'package:s_contact/core/utils/vcard_helper.dart';
 import 'package:s_contact/models/contact_model.dart';
 import 'package:s_contact/providers/user_profile_provider.dart';
-import 'package:s_contact/routes.dart';
 import 'package:s_contact/widgets/app_logo.dart';
 import 'package:s_contact/widgets/contact_form.dart';
 
@@ -15,202 +14,254 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(userProfileProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const AppLogo(),
-        centerTitle: false,
-        actions: [
-          if (profileAsync.hasValue && profileAsync.value != null)
-            Container(
-              margin: const EdgeInsets.only(right: 10, bottom: 8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(
-                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  Icons.person,
-                  color: AppTheme.primaryColor,
-                ),
-                onPressed: () => AppRoutes.navigateToProfile(context),
-                tooltip: 'Mon Profil',
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                ),
-              ),
-            ),
+      appBar: AppBar(title: const AppLogo(), centerTitle: false, elevation: 0),
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => _buildErrorView(context),
+        data: (profile) => profile == null
+            ? _buildNoProfileView(context, ref, isDark)
+            : _buildProfileView(context, profile, isDark),
+      ),
+    );
+  }
+
+  Widget _buildErrorView(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, color: AppTheme.errorColor, size: 48),
+          const SizedBox(height: 16),
+          Text(
+            'Erreur de chargement',
+            style: TextStyle(color: AppTheme.errorColor),
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section bienvenue
-            _buildWelcomeSection(context),
+    );
+  }
 
-            const SizedBox(height: 32),
+  Widget _buildNoProfileView(BuildContext context, WidgetRef ref, bool isDark) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Bienvenue',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Configurez votre carte de visite numérique',
+            style: TextStyle(
+              fontSize: 16,
+              color: isDark ? Colors.grey[400] : AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 32),
+          ContactForm(
+            onSave: (contact) async {
+              return await ref
+                  .read(userProfileProvider.notifier)
+                  .saveProfile(contact);
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Contenu principal selon l'état du profil
-            profileAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.errorColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadius),
+  Widget _buildProfileView(
+    BuildContext context,
+    ContactModel profile,
+    bool isDark,
+  ) {
+    final qrData = VCardHelper.generateQRData(profile);
+    // Use a high-quality nice gradient for the card background
+    final gradient = LinearGradient(
+      colors: isDark
+          ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+          : [
+              const Color(0xFF2563EB),
+              const Color(0xFF1D4ED8),
+            ], // Professional Blue
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          // Digital Business Card
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: (isDark ? Colors.black : const Color(0xFF2563EB))
+                      .withValues(alpha: 0.3),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Background decorative circles
+                Positioned(
+                  top: -50,
+                  right: -50,
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
                   ),
+                ),
+                Positioned(
+                  bottom: -30,
+                  left: -30,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
+                  ),
+                ),
+
+                // Content
+                Padding(
+                  padding: const EdgeInsets.all(32),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: AppTheme.errorColor,
-                        size: 48,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Erreur lors du chargement',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.errorColor,
+                      // Avatar / Initials
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            profile.getInitials(),
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+
+                      const SizedBox(height: 24),
+
+                      // Name & Title
                       Text(
-                        error.toString(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.errorColor.withValues(alpha: 0.8),
-                        ),
+                        profile.getDisplayName(),
                         textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+
+                      if (profile.jobTitle != null ||
+                          profile.company != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          [profile.jobTitle, profile.company]
+                              .where((e) => e != null && e.isNotEmpty)
+                              .join('  •  '),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withValues(alpha: 0.9),
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 32),
+                      const HorizontalDivider(color: Colors.white24),
+                      const SizedBox(height: 32),
+
+                      // QR Code
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: QrImageView(
+                          data: qrData,
+                          version: QrVersions.auto,
+                          size: 180,
+                          gapless: false,
+                          // Make QR dark blue/black for better contrast
+                          dataModuleStyle: const QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.square,
+                            color: Color(0xFF1E293B),
+                          ),
+                          eyeStyle: const QrEyeStyle(
+                            eyeShape: QrEyeShape.square,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Text(
+                        'Scanner pour ajouter',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          letterSpacing: 1.0,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              data: (profile) => profile == null
-                  ? _buildNoProfileView(context, ref)
-                  : _buildProfileView(context, profile, ref),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(height: 100), // Bottom scroll padding
+        ],
       ),
     );
   }
+}
 
-  Widget _buildWelcomeSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: 'Partagez ',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.primaryColor,
-                ),
-              ),
-              TextSpan(
-                text: 'facilement votre contact',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Partagez votre contact le plus facilement possible 🤧',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-      ],
-    );
-  }
+class HorizontalDivider extends StatelessWidget {
+  final Color color;
+  const HorizontalDivider({super.key, required this.color});
 
-  Widget _buildNoProfileView(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        // Formulaire de création de profil
-        ContactForm(
-          onSave: (contact) async {
-            final success = await ref.read(userProfileProvider.notifier).saveProfile(contact);
-            return success;
-          },
-          title: 'Créer le contact',
-        ),
-
-        const SizedBox(height: 32),
-
-      ],
-    );
-  }
-
-  Widget _buildProfileView(BuildContext context, ContactModel profile, WidgetRef ref) {
-    final qrData = VCardHelper.generateQRData(profile);
-
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(AppTheme.cardBorderRadius),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Text(
-                'Scannez ce code pour ajouter ${profile.getDisplayName().split(' ').first} à vos contacts',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(context).dividerColor,
-                  ),
-                ),
-                child: QrImageView(
-                  data: qrData,
-                  version: QrVersions.auto,
-                    size: 300,
-                  gapless: false,
-                  errorCorrectionLevel: QrErrorCorrectLevel.M,
-                  eyeStyle: QrEyeStyle(
-                    eyeShape: QrEyeShape.square,
-                    color: AppTheme.primaryColor,
-                  ),
-                  dataModuleStyle: QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.square,
-                    color: AppTheme.primaryColor,
-                  ),
-                ),
-              ),
-              ],
-          ),
-        ),
-      ],
-    );
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: double.infinity, height: 1, color: color);
   }
 }

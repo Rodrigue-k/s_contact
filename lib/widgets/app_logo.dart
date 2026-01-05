@@ -9,7 +9,7 @@ class AppLogo extends StatelessWidget {
 
   const AppLogo({
     super.key,
-    this.sFontSize = 28,
+    this.sFontSize = 24,
     this.contactFontSize = 24,
     this.centerTitle = false,
   });
@@ -28,7 +28,7 @@ class AppLogo extends StatelessWidget {
             ),
           ),
           TextSpan(
-            text: 'C',
+            text: ' Contact',
             style: GoogleFonts.inter(
               fontSize: contactFontSize,
               fontWeight: FontWeight.w600,

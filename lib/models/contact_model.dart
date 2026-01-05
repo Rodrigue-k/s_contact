@@ -10,6 +10,7 @@ class ContactModel {
   String? address;
   String? website;
   String? note;
+  String? title; // Job title for vCard compatibility
 
   ContactModel({
     this.id,
@@ -23,6 +24,7 @@ class ContactModel {
     this.address,
     this.website,
     this.note,
+    this.title,
   });
 
   // Constructeur pour créer un contact à partir du nom complet
@@ -47,18 +49,19 @@ class ContactModel {
 
   // Convertir en Map pour le stockage local
   Map<String, String?> toMap() => {
-        'id': id,
-        'name': name,
-        'firstName': firstName,
-        'lastName': lastName,
-        'phone': phone,
-        'email': email,
-        'company': company,
-        'jobTitle': jobTitle,
-        'address': address,
-        'website': website,
-        'note': note,
-      };
+    'id': id,
+    'name': name,
+    'firstName': firstName,
+    'lastName': lastName,
+    'phone': phone,
+    'email': email,
+    'company': company,
+    'jobTitle': jobTitle,
+    'address': address,
+    'website': website,
+    'note': note,
+    'title': title,
+  };
 
   // Créer depuis un Map
   factory ContactModel.fromMap(Map<String, String?> map) {
@@ -74,12 +77,15 @@ class ContactModel {
       address: map['address'],
       website: map['website'],
       note: map['note'],
+      title: map['title'],
     );
   }
 
   // Vérifier si le contact a des informations essentielles
   bool hasEssentialInfo() {
-    return name.isNotEmpty && (phone != null && phone!.isNotEmpty || email != null && email!.isNotEmpty);
+    return name.isNotEmpty ||
+        (phone != null && phone!.isNotEmpty) ||
+        (email != null && email!.isNotEmpty);
   }
 
   // Obtenir le nom d'affichage (utilise le nom complet ou construit depuis prénom + nom)
@@ -95,6 +101,17 @@ class ContactModel {
     return '';
   }
 
+  // Get initials from name
+  String getInitials() {
+    final displayName = getDisplayName();
+    if (displayName.isEmpty) return '?';
+    final parts = displayName.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+    }
+    return parts.first[0].toUpperCase();
+  }
+
   // Copier avec des modifications
   ContactModel copyWith({
     String? id,
@@ -108,6 +125,7 @@ class ContactModel {
     String? address,
     String? website,
     String? note,
+    String? title,
   }) {
     return ContactModel(
       id: id ?? this.id,
@@ -121,6 +139,7 @@ class ContactModel {
       address: address ?? this.address,
       website: website ?? this.website,
       note: note ?? this.note,
+      title: title ?? this.title,
     );
   }
 

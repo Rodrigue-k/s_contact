@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:s_contact/core/logger.dart';
 import 'package:s_contact/models/contact_model.dart';
 
 class LocalStorage {
@@ -26,7 +27,7 @@ class LocalStorage {
       final profileData = jsonEncode(profile.toMap());
       return await _preferences!.setString(_userProfileKey, profileData);
     } catch (e) {
-      print('Erreur sauvegarde profil: $e');
+      AppLogger.error('Erreur sauvegarde profil: $e');
       return false;
     }
   }
@@ -42,13 +43,13 @@ class LocalStorage {
       }
 
       final Map<String, dynamic> map = jsonDecode(profileData);
-      final contactMap = Map<String, String?>.from(map.map(
-        (key, value) => MapEntry(key, value?.toString()),
-      ));
+      final contactMap = Map<String, String?>.from(
+        map.map((key, value) => MapEntry(key, value?.toString())),
+      );
 
       return ContactModel.fromMap(contactMap);
     } catch (e) {
-      print('Erreur récupération profil: $e');
+      AppLogger.error('Erreur récupération profil: $e');
       return null;
     }
   }
@@ -72,7 +73,7 @@ class LocalStorage {
 
       return await _preferences!.remove(_userProfileKey);
     } catch (e) {
-      print('Erreur suppression profil: $e');
+      AppLogger.error('Erreur suppression profil: $e');
       return false;
     }
   }
@@ -85,7 +86,7 @@ class LocalStorage {
       final settingsData = jsonEncode(settings);
       return await _preferences!.setString(_appSettingsKey, settingsData);
     } catch (e) {
-      print('Erreur sauvegarde paramètres: $e');
+      AppLogger.error('Erreur sauvegarde paramètres: $e');
       return false;
     }
   }
@@ -102,7 +103,7 @@ class LocalStorage {
 
       return jsonDecode(settingsData);
     } catch (e) {
-      print('Erreur récupération paramètres: $e');
+      AppLogger.error('Erreur récupération paramètres: $e');
       return {};
     }
   }
@@ -114,7 +115,7 @@ class LocalStorage {
 
       return await _preferences!.setString(_themeModeKey, themeMode);
     } catch (e) {
-      print('Erreur sauvegarde mode thème: $e');
+      AppLogger.error('Erreur sauvegarde mode thème: $e');
       return false;
     }
   }
@@ -126,7 +127,7 @@ class LocalStorage {
 
       return _preferences!.getString(_themeModeKey);
     } catch (e) {
-      print('Erreur récupération mode thème: $e');
+      AppLogger.error('Erreur récupération mode thème: $e');
       return null;
     }
   }
@@ -153,7 +154,7 @@ class LocalStorage {
 
       return await _preferences!.setString(key, value);
     } catch (e) {
-      print('Erreur sauvegarde string: $e');
+      AppLogger.error('Erreur sauvegarde string: $e');
       return false;
     }
   }
@@ -165,7 +166,7 @@ class LocalStorage {
 
       return _preferences!.getString(key);
     } catch (e) {
-      print('Erreur récupération string: $e');
+      AppLogger.error('Erreur récupération string: $e');
       return null;
     }
   }
@@ -177,7 +178,7 @@ class LocalStorage {
 
       return await _preferences!.remove(key);
     } catch (e) {
-      print('Erreur suppression clé: $e');
+      AppLogger.error('Erreur suppression clé: $e');
       return false;
     }
   }
@@ -189,7 +190,7 @@ class LocalStorage {
 
       return await _preferences!.clear();
     } catch (e) {
-      print('Erreur vidage stockage: $e');
+      AppLogger.error('Erreur vidage stockage: $e');
       return false;
     }
   }
@@ -201,7 +202,7 @@ class LocalStorage {
 
       return _preferences!.getKeys();
     } catch (e) {
-      print('Erreur récupération clés: $e');
+      AppLogger.error('Erreur récupération clés: $e');
       return <String>{};
     }
   }

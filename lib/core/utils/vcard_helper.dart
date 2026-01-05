@@ -1,3 +1,4 @@
+import 'package:s_contact/core/logger.dart';
 import 'package:s_contact/models/contact_model.dart';
 
 class VCardHelper {
@@ -136,9 +137,12 @@ class VCardHelper {
               final postalCode = addrParts[5].isNotEmpty ? addrParts[5] : '';
               final country = addrParts[6].isNotEmpty ? addrParts[6] : '';
 
-              final addressParts = [street, city, postalCode, country]
-                  .where((part) => part.isNotEmpty)
-                  .toList();
+              final addressParts = [
+                street,
+                city,
+                postalCode,
+                country,
+              ].where((part) => part.isNotEmpty).toList();
 
               if (addressParts.isNotEmpty) {
                 contact.address = addressParts.join(', ');
@@ -154,14 +158,25 @@ class VCardHelper {
         }
       }
 
-      // Si on n'a pas de nom, utiliser une valeur par défaut
+      // Si on n'a pas de nom, utiliser une valeur par défaut ou des infos disponibles
       if (contact.name.isEmpty) {
         contact.name = contact.getDisplayName();
+        if (contact.name.isEmpty) {
+          if (contact.company != null && contact.company!.isNotEmpty) {
+            contact.name = contact.company!;
+          } else if (contact.phone != null && contact.phone!.isNotEmpty) {
+            contact.name = contact.phone!;
+          } else if (contact.email != null && contact.email!.isNotEmpty) {
+            contact.name = contact.email!;
+          } else {
+            contact.name = 'Nouveau Contact';
+          }
+        }
       }
 
       return contact.hasEssentialInfo() ? contact : null;
     } catch (e) {
-      print('Erreur lors du parsing vCard: $e');
+      AppLogger.error('Erreur lors du parsing vCard: $e');
       return null;
     }
   }
